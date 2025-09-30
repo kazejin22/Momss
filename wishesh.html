@@ -239,10 +239,6 @@
                 gap: 0;
             }
 
-            /* Sembunyikan halaman kiri di mobile */
-            .page.left-page {
-                display: none;
-            }
 
             .page {
                 width: 100%;
@@ -420,84 +416,117 @@
         BAGIAN JAVASCRIPT: Logika Spread
         ==================================
         */
-        const wrapper = document.querySelector('.pages-wrapper');
-        const spreads = document.querySelectorAll('.spread');
         const bookContainer = document.querySelector('.book-container');
-        let currentSpreadIndex = 0; 
-        const totalSpreads = spreads.length; 
+        const spreads = document.querySelectorAll('.spread');
+        // Ambil SEMUA halaman secara berurutan (kiri, kanan, kiri, kanan, ...)
+        const pages = Array.from(document.querySelectorAll('.spread .page'));
 
-        function goToSpread(index, direction = 'next') {
-            if (index < 0 || index >= totalSpreads) {
-                return;
+        let currentSpreadIndex = 0;
+        let currentPageIndex = 0;
+        const totalSpreads = spreads.length;
+        const totalPages = pages.length;
+
+        const isMobile = () => window.innerWidth <= 768;
+
+        // Fungsi untuk menampilkan satu halaman spesifik di mobile
+        function showPage(index) {
+            if (index < 0 || index >= totalPages) return;
+
+            // Sembunyikan semua halaman terlebih dahulu
+            pages.forEach(p => p.style.display = 'none');
+            // Non-aktifkan semua spread
+            spreads.forEach(s => s.classList.remove('active'));
+
+            // Tampilkan halaman yang dipilih
+            const targetPage = pages[index];
+            targetPage.style.display = 'block';
+
+            // Aktifkan parent spread-nya agar tetap terlihat
+            const parentSpread = targetPage.closest('.spread');
+            if (parentSpread) {
+                parentSpread.classList.add('active');
             }
+
+            currentPageIndex = index;
+        }
+
+        // Fungsi untuk navigasi spread di desktop
+        function goToSpread(index, direction = 'next') {
+            if (index < 0 || index >= totalSpreads) return;
 
             const currentSpread = spreads[currentSpreadIndex];
             const targetSpread = spreads[index];
 
             if (direction === 'next') {
-                // Animasi balik halaman kanan ke kiri
                 const rightPage = currentSpread.querySelector('.right-page');
                 if (rightPage) {
-                    // Flip halaman dan ganti spread bersamaan
                     rightPage.classList.add('flippable', 'flipping');
-                    
                     setTimeout(() => {
-                        currentSpread.classList.add('exiting');
                         currentSpread.classList.remove('active');
                         targetSpread.classList.add('active');
                     }, 400);
-                    
                     setTimeout(() => {
                         rightPage.classList.remove('flippable', 'flipping');
-                        currentSpread.classList.remove('exiting');
                     }, 1100);
                 }
             } else {
-                // Animasi balik halaman kiri ke kanan (mundur)
-                currentSpread.classList.add('exiting');
                 currentSpread.classList.remove('active');
                 targetSpread.classList.add('active');
-                
-                setTimeout(() => {
-                    currentSpread.classList.remove('exiting');
-                }, 600);
             }
-
             currentSpreadIndex = index;
         }
 
-        // Klik pada halaman kanan untuk next, halaman kiri untuk prev
-        bookContainer.addEventListener('click', (e) => {
-            const rect = bookContainer.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const containerWidth = rect.width;
-            
-            // Jika klik di sebelah kanan (lebih dari 50% lebar), next
-            if (clickX > containerWidth / 2) {
-                if (currentSpreadIndex < totalSpreads - 1) {
-                    goToSpread(currentSpreadIndex + 1, 'next');
+        // Fungsi utama yang menangani klik
+        function handleNavigation(e) {
+            if (isMobile()) {
+                // Navigasi per halaman di mobile
+                if (currentPageIndex < totalPages - 1) {
+                    showPage(currentPageIndex + 1);
                 } else {
-                    // Jika sudah di halaman terakhir, zoom out dan redirect ke Close.html
                     document.body.classList.add('zoom-transition');
                     bookContainer.classList.add('zoom-out');
-                    setTimeout(() => {
-                        window.location.href = 'close.html';
-                    }, 1200);
+                    setTimeout(() => { window.location.href = 'close.html'; }, 1200);
                 }
-            } 
-            // Jika klik di sebelah kiri (kurang dari 50% lebar), prev
-            else {
-                if (currentSpreadIndex > 0) {
-                    goToSpread(currentSpreadIndex - 1, 'prev');
+            } else {
+                // Navigasi per spread di desktop
+                const rect = bookContainer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                if (clickX > rect.width / 2) { // Klik kanan
+                    if (currentSpreadIndex < totalSpreads - 1) {
+                        goToSpread(currentSpreadIndex + 1, 'next');
+                    } else {
+                        document.body.classList.add('zoom-transition');
+                        bookContainer.classList.add('zoom-out');
+                        setTimeout(() => { window.location.href = 'close.html'; }, 1200);
+                    }
+                } else { // Klik kiri
+                    if (currentSpreadIndex > 0) {
+                        goToSpread(currentSpreadIndex - 1, 'prev');
+                    }
                 }
             }
-        });
+        }
 
-        // Tambahkan cursor pointer untuk indikasi bisa diklik
+        // Menyiapkan tampilan awal berdasarkan ukuran layar
+        function initializeView() {
+            if (isMobile()) {
+                showPage(0);
+            } else {
+                // Reset semua style display halaman jika dari mobile ke desktop
+                pages.forEach(p => p.style.display = '');
+                spreads.forEach((s, i) => {
+                    s.classList.toggle('active', i === 0);
+                });
+                currentSpreadIndex = 0;
+            }
+        }
+
+        bookContainer.addEventListener('click', handleNavigation);
         bookContainer.style.cursor = 'pointer';
+        window.addEventListener('resize', initializeView);
 
-        // Inisialisasi: Tampilkan spread pertama saat dimuat
-        goToSpread(0);
+        // Inisialisasi awal saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', initializeView);
     </script>
 
 </body>
