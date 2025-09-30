@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>With Love - Closing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
     body {
         display: flex;
@@ -12,7 +13,7 @@
         min-height: 100vh;
         margin: 0;
         background: #ffdfec;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Kalam', cursive, sans-serif; /* Set font utama agar konsisten */
         overflow: hidden;
         touch-action: none; /* Mencegah zoom dan gesture */
         -webkit-user-select: none;
@@ -105,6 +106,42 @@
         background: linear-gradient(135deg, #ff80aa, #ff4d88);
         transform: scale(1.05);
         box-shadow: 0 8px 20px rgba(255, 77, 136, 0.4);
+    }
+
+    /* Kartu Notifikasi Estetik (Diperbaiki) */
+    .alert-card {
+        position: fixed;
+        bottom: 30px; /* Posisi akhir di layar */
+        left: 50%;
+        transform: translate(-50%, 150px); /* Mulai dari bawah */
+        background: white;
+        color: #ff4f7b;
+        padding: 18px 25px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(255, 128, 170, 0.5);
+        display: flex;
+        align-items: center;
+        font-size: 1.2em;
+        z-index: 100;
+        opacity: 0;
+        transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.8s ease;
+    }
+
+    .alert-card.show {
+        transform: translate(-50%, 0); /* Kembali ke posisi normal */
+        opacity: 1;
+    }
+
+    .alert-icon {
+        font-size: 1.5em;
+        margin-right: 15px;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
     }
 
     .letter h1 {
@@ -239,10 +276,17 @@
     </div>
 </div>
 
+<!-- Kartu Notifikasi Estetik -->
+<div class="alert-card" id="alertCard">
+    <div class="alert-icon">💖</div>
+    <div class="alert-message">The envelope is sealed with love!</div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const envelopeWrapper = document.getElementById('envelopeWrapper');
     const closePageButton = document.getElementById('closePageButton');
+    const alertCard = document.getElementById('alertCard');
 
     let isClosing = false;
 
@@ -253,11 +297,10 @@ document.addEventListener('DOMContentLoaded', () => {
             envelopeWrapper.classList.add('closing');
             isClosing = true;
 
-            // Setelah animasi selesai (0.7s kertas + 0.5s tutup)
+            // Tampilkan kartu notifikasi setelah animasi amplop selesai
             setTimeout(() => {
-                alert("The envelope is now closed! 💖"); 
-                // Bisa diganti redirect atau efek lain
-            }, 1200);
+                alertCard.classList.add('show');
+            }, 1400);
         }
     });
 });
