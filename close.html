@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>With Love - Closing</title>
+    <style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background: #ffdfec;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+        touch-action: none; /* Mencegah zoom dan gesture */
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .envelope-wrapper {
+        position: relative;
+        z-index: 10;
+        cursor: pointer;
+        transition: transform 1s cubic-bezier(0.5, 0, 0.5, 1), opacity 0.5s 0.8s;
+    }
+
+    .envelope {
+        width: 300px;
+        height: 200px;
+        position: relative;
+    }
+
+    /* Amplop */
+    .body-flap {
+        width: 100%;
+        height: 100%;
+        background-color: #ffb0e3;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        border-radius: 5px;
+    }
+
+    .top-flap {
+        width: 0;
+        height: 0;
+        border-left: 150px solid transparent;
+        border-right: 150px solid transparent;
+        border-top: 100px solid #ff8ad6;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: top;
+        transform: rotateX(180deg); /* Awal sudah terbuka */
+        transition: transform 0.8s ease-in-out, z-index 0s 0.8s;
+        z-index: 1; /* Di belakang kertas saat terbuka */
+    }
+
+    /* Kertas surat */
+    .letter {
+        width: 85%;
+        height: 280px;
+        background-color: white;
+        position: absolute;
+        top: -120px;
+        left: 7.5%;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        z-index: 3; /* Di depan tutup amplop */
+        padding: 25px 20px;
+        box-sizing: border-box;
+        text-align: center;
+        border-radius: 5px;
+        transition: transform 0.7s ease-in-out, opacity 0.3s, z-index 0s 0.7s;
+        opacity: 1;
+    }
+
+    /* Efek penutup saat klik Close */
+    .envelope-wrapper.closing .top-flap {
+        transform: rotateX(0deg); /* Tutup kembali */
+        z-index: 4;
+    }
+
+    .envelope-wrapper.closing .letter {
+        transform: translateY(150px); /* Kertas masuk kembali */
+        opacity: 0;
+        z-index: 1;
+    }
+
+    /* Tombol */
+    #closePageButton {
+        margin-top: 15px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #ffb6d9, #ff80aa);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    #closePageButton:hover {
+        background: linear-gradient(135deg, #ff80aa, #ff4d88);
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(255, 77, 136, 0.4);
+    }
+
+    .letter h1 {
+        color: #ff4f7b;
+        font-size: 1.3rem;
+        margin: 0 0 10px 0;
+    }
+
+    .letter p {
+        color: #555;
+        line-height: 1.3;
+        font-size: 0.9em;
+        margin: 5px 0;
+    }
+
+    /* Responsive untuk Mobile */
+    @media (max-width: 768px) {
+        body {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .envelope-wrapper {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .envelope {
+            width: 280px;
+            height: 180px;
+        }
+
+        .top-flap {
+            border-left: 140px solid transparent;
+            border-right: 140px solid transparent;
+            border-top: 90px solid #ff8ad6;
+        }
+
+        .letter {
+            width: 90%;
+            height: 260px;
+            top: -110px;
+            left: 5%;
+            padding: 20px 15px;
+        }
+
+        .letter h1 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+        }
+
+        .letter p {
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        #closePageButton {
+            padding: 10px 18px;
+            font-size: 0.9em;
+        }
+    }
+
+    @media (max-width: 480px) {
+        body {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .envelope-wrapper {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .envelope {
+            width: 260px;
+            height: 170px;
+        }
+
+        .top-flap {
+            border-left: 130px solid transparent;
+            border-right: 130px solid transparent;
+            border-top: 85px solid #ff8ad6;
+        }
+
+        .letter {
+            width: 92%;
+            height: 240px;
+            top: -100px;
+            left: 4%;
+            padding: 18px 12px;
+        }
+
+        .letter h1 {
+            font-size: 1.3em;
+        }
+
+        .letter p {
+            font-size: 0.8em;
+        }
+
+        #closePageButton {
+            padding: 9px 16px;
+            font-size: 0.85em;
+            margin-top: 12px;
+        }
+    }
+    </style>
+</head>
+<body>
+
+<div class="envelope-wrapper" id="envelopeWrapper">
+    <div class="envelope" id="envelope">
+        <div class="flap top-flap"></div>
+
+        <div class="letter">
+            <h1>We love you endlessly.</h1>
+            <p>Sending all our love and warmest wishes to you, Mama.</p>
+            <img src="image/book.gif" alt="Heart" style="width: 50px; height: 50px; margin: 5px 0;">
+            <p>Thank you for being the heart that guides us every day.</p>
+            <button id="closePageButton">Close 💌</button>
+        </div>
+
+        <div class="body-flap"></div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const envelopeWrapper = document.getElementById('envelopeWrapper');
+    const closePageButton = document.getElementById('closePageButton');
+
+    let isClosing = false;
+
+    closePageButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+
+        if (!isClosing) {
+            envelopeWrapper.classList.add('closing');
+            isClosing = true;
+
+            // Setelah animasi selesai (0.7s kertas + 0.5s tutup)
+            setTimeout(() => {
+                alert("The envelope is now closed! 💖"); 
+                // Bisa diganti redirect atau efek lain
+            }, 1200);
+        }
+    });
+});
+</script>
+
+</body>
+</html>

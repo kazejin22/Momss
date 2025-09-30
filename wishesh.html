@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurnal Ucapan Ulang Tahun Mama</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /*
+        ==================================
+        BAGIAN CSS: Styling Jurnal Estetik
+        ==================================
+        */
+        body {
+            font-family: 'Kalam', cursive; /* Font tulisan tangan */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(1978deg, #ffdfec 70%, #ff85b6 100%);
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Wadah Utama Buku */
+        .book-container {
+            perspective: 1500px;
+            width: 780px;
+            height: 550px;
+            margin-bottom: 30px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 1.5s cubic-bezier(0.4, 0.0, 0.2, 1), 
+                        opacity 1.2s ease-in-out;
+        }
+
+        .book-container.zoom-out {
+            transform: scale(0.2) translateY(-30%);
+            opacity: 0;
+        }
+
+        body.zoom-transition {
+            background: linear-gradient(to bottom, #ffdfec, #ffb6d9);
+            transition: background 1.5s ease-in-out;
+        }
+
+        /* Wadah pergeseran halaman */
+        .pages-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        /* Wadah 2 halaman (Spread) */
+        .spread {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .spread.active {
+            z-index: 2;
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+        
+        .spread.exiting {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        /* Halaman yang bisa dibalik */
+        .page.flippable {
+            transform-style: preserve-3d;
+            transform-origin: left center;
+            transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1),
+                        box-shadow 1s ease;
+            position: relative;
+            backface-visibility: hidden;
+        }
+        
+        .page.flipping {
+            transform: rotateY(-180deg);
+            z-index: 10;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Efek bayangan saat halaman berputar */
+        .page.flippable::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.15), transparent);
+            opacity: 0;
+            transition: opacity 1s ease;
+            pointer-events: none;
+        }
+        
+        .page.flipping::after {
+            opacity: 1;
+        }
+
+        /* Tampilan setiap Halaman Tunggal Jurnal */
+        .page {
+            width: 350px; 
+            height: 90%; 
+            background-color: #fcf9f2; /* Warna kertas jurnal */
+            border: 1px solid #c0b8b0;
+            padding: 30px 25px;
+            box-sizing: border-box;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 
+                        inset 0 0 10px rgba(0, 0, 0, 0.05); 
+            position: relative;
+            border-radius: 5px;
+            
+            /* Efek Garis Kertas Bergaris */
+            background-image: repeating-linear-gradient(#eee 0, #eee 1px, transparent 1px, transparent 30px);
+            line-height: 1.8; 
+            
+            /* Konten */
+            text-align: left;
+            color: #383838;
+            font-size: 1em;
+            overflow-y: auto; 
+        }
+
+        .page p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        .page h2 {
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        /* Efek Lubang Jilid/Jahitan di Sisi Kiri */
+        .left-page::before {
+            content: "";
+            position: absolute;
+            left: -10px;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            /* Efek garis jahit */
+            background-image: linear-gradient(to bottom, #d84343 50%, transparent 50%);
+            background-size: 100% 20px;
+        }
+        .right-page {
+            padding-right: 40px; 
+        }
+
+        /* Styling Konten */
+        .page h3 {
+            font-family: 'Architects Daughter', cursive; /* Font judul/spidol */
+            color: #4CAF50; 
+            margin-top: 0;
+            border-bottom: 2px dashed #FFC107; 
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Styling untuk FOTO POLAROID (Scrapbook Look) */
+        .photo {
+            width: 120px;
+            height: 140px;
+            background: white;
+            padding: 10px 10px 30px 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            z-index: 2;
+        }
+        .photo img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            display: block;
+            border: 1px solid #eee;
+        }
+        .photo p {
+            font-size: 0.8em;
+            text-align: center;
+            margin: 5px 0 0 0;
+            color: #888;
+        }
+
+        /* Posisi dan Rotasi Foto */
+        .photo.top-left { top: 20px; left: 20px; transform: rotate(-5deg); }
+        .photo.bottom-right { bottom: 20px; right: 20px; transform: rotate(8deg); }
+
+        /* Efek Selotip (Tape) */
+        .photo::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 15px;
+            background: rgba(200, 200, 200, 0.7); 
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            top: -5px;
+            left: calc(50% - 25px);
+            transform: rotate(-1deg);
+        }
+        
+        /* Responsive untuk Mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .book-container {
+                width: 100%;
+                max-width: 400px;
+                height: auto;
+                min-height: 500px;
+            }
+
+            .spread {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            /* Sembunyikan halaman kiri di mobile */
+            .page.left-page {
+                display: none;
+            }
+
+            .page {
+                width: 100%;
+                max-width: 350px;
+                height: auto;
+                min-height: 450px;
+                font-size: 0.95em;
+            }
+
+            .page h3 {
+                font-size: 1.3em;
+            }
+
+            /* Sesuaikan posisi foto di mobile */
+            .photo {
+                width: 100px;
+                height: 120px;
+                padding: 8px 8px 25px 8px;
+            }
+
+            .photo img {
+                height: 80px;
+            }
+
+            .photo.top-left {
+                top: 10px;
+                left: 10px;
+            }
+
+            .photo.bottom-right {
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+
+        /* Untuk HP sangat kecil */
+        @media (max-width: 480px) {
+            .book-container {
+                max-width: 100%;
+                height: auto;
+                min-height: 450px;
+            }
+
+            .page {
+                max-width: 100%;
+                padding: 20px 15px;
+                font-size: 0.9em;
+            }
+
+            .page h3 {
+                font-size: 1.2em;
+            }
+
+            .photo {
+                width: 80px;
+                height: 100px;
+            }
+
+            .photo img {
+                height: 65px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-container">
+        <div class="pages-wrapper">
+            <div class="spread" data-spread-id="1">
+                <div class="page left-page cover-page" style="text-align: center; padding-top: 20px;">
+                    <h2 style="font-size: 2.5em; color: #D32F2F; margin-bottom: 10px; line-height: 1.3;">Pages of <br> Heartfelt Love</h2>
+                    <p style="font-size: 1.5em; color: #795548; margin-top: 10px; line-height: 1.3;">For Mama Who Survives Me Daily</p>
+                    <div class="photo top-left" style="top: 260px; left: 110px; transform: rotate(-8deg);">
+                        <img src="image/tigabelas.jpg" alt="Mama Muda">
+                        <p>Mama w/ Potatoo</p>
+                    </div>
+                </div>
+                
+                <div class="page right-page wish-page">
+                    <h3>From Adek Potatoo</h3>
+                    <p>Dear Mama,</p>
+                    <p>Every moment with you is a priceless story, Mama. </p>
+                    <p>You are the light that guides me, and may your life always be filled with laughter, serenity, and happiness, with every day bringing you the calm and joy you truly deserve.</p>
+                    <p>love youuu!</p>
+                    <p style="text-align: right; margin-top: 20px; color: #D32F2F; font-style: italic;">— Cutiee</p>
+                </div>
+            </div>
+
+            <div class="spread" data-spread-id="2">
+                <div class="page left-page wish-page">
+                    <h3>From Papa with Love</h3>
+                    <p>Pada hari spesialmu ini, aku berdoa semoga Allah mengabulkan semua doa dan harapanmu,</p>
+                    <p>serta memberikan kebahagiaan dunia dan akhirat untuk kita.</p>
+                    <div class="photo bottom-right" style="bottom: 40px; right: 30px; transform: rotate(5deg);">
+                        <img src="image/tujubelas.jpg" alt="Foto Papa Mama">
+                        <p>Sweet Moments Together</p>
+                    </div>
+                </div>
+                
+                <div class="page right-page wish-page">
+                    <h3>From Papa with Love</h3>
+                    <p>Aku bersyukur atas setiap hari yang kita lewati bersama.</p>
+                    <p>Semoga Allah memberi umur panjang, kebahagiaan, dan kelimpahan rezeki untukmu. Semoga menjadi ibu untuk anak" kita yang kuat dan sabar amin..</p>
+                    <p style="text-align: right; margin-top: 40px; color: #D32F2F; font-style: italic;">— A note straight from the heart.</p>
+                </div>
+            </div>
+            
+            <div class="spread" data-spread-id="3">
+                <div class="page left-page wish-page">
+                    <h3>With Love, From Kakak</h3>
+                    <p>Hai mbak puti!</p>
+                    <p>Makasih ya udah jadi temen plus orang tua buat tary &  makasih buat semua nasehatnya</p>
+                    <p>Berkah dunia akhirat, Happy terus, panjang umur & jaga kesehatan</p>
+                    <p>We Love Youuu</p>
+                    <p style="text-align: right; margin-top: 40px; color: #D32F2F; font-style: italic;">— Tariii</p>
+                </div>
+                
+                <div class="page right-page wish-page">
+                    <h3>From Your Loving Tiny Niece</h3>
+                    <p>haii mba putihhh</p>
+                    <p>happyy birthdayy!!</p>
+                    <p>sehatt sama bahagiaa selaluu</p> 
+                    <p>stay young</p>
+                    <p style="text-align: right; margin-top: 40px; color: #D32F2F; font-style: italic;">— Chelseaa</p>
+                </div>
+            </div>
+            
+            <div class="spread" data-spread-id="4">
+                <div class="page left-page wish-page">
+                    <h3>A Wish from an Old Friend</h3>
+                    <p>Semoga selalu diberikan sehat jasmani dan rohani, Kelimpahan dan keberkahan rezeki serta kesuksesan dan kemandirian buat anak-anak yg keduanya lagi merantau dinegeri orang ..</p>
+                    <p>Aamiin</p>
+                    <p style="text-align: right; margin-top: 40px; color: #D32F2F; font-style: italic;">— P Azam</p>
+                </div>
+                
+                <div class="page right-page wish-page">
+                    <h3>To Mama, With Love</h3>
+                    <div class="photo top-left" style="top: 250px; left: 60px; transform: rotate(5deg);">
+                        <img src="image/mayy.jpg" alt="Foto Mayy">
+                        <p>May & Aga</p>
+                    </div>
+                    <p>Dear Mama,</p>
+                    <p>Happy birthday mom❤ Wishing you a day as beautiful as your heart.</p>
+                    <p style="text-align: right; margin-top: 60px; color: #D32F2F; font-style: italic;">— Mayy</p>
+                </div>
+            </div>
+            
+            <div class="spread" data-spread-id="5">
+                <div class="page left-page wish-page">
+                    <h3>Kumel Little Love</h3>
+                    <div class="photo bottom-right" style="bottom: 25px; left: 50px; transform: rotate(-5deg);">
+                        <img src="image/kumell.jpg" alt="Foto Kumel">
+                        <p>Kumel the Cat 🐾</p>
+                    </div>
+                    <p>Meow meow~ 🐾</p>
+                    <p>Mamaaa, Kumel love you soooo much!</p>
+                    <p>Purr purr purr… jangan lupa bagi snack ya!</p>
+                    <p>Meowww~ 😹💗 Semoga Mama selalu happy dan cozy!</p>
+                    <p style="text-align: right; margin-top: 30px; color: #D32F2F; font-style: italic;">— Kumelll</p>
+                </div>
+                
+                <div class="page right-page cover-page" style="text-align: center; padding-top: 80px;">
+                    <h2 style="font-size: 2em; color: #795548; margin-bottom: 20px;">Closed With Love ❤</h2>
+                    <p style="font-size: 1.1em;">Every wish here is lovingly collected for Mama.</p>
+                    <p style="margin-top: 40px; font-style: italic; color: #5D4037;">— A Product of Love</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        /*
+        ==================================
+        BAGIAN JAVASCRIPT: Logika Spread
+        ==================================
+        */
+        const wrapper = document.querySelector('.pages-wrapper');
+        const spreads = document.querySelectorAll('.spread');
+        const bookContainer = document.querySelector('.book-container');
+        let currentSpreadIndex = 0; 
+        const totalSpreads = spreads.length; 
+
+        function goToSpread(index, direction = 'next') {
+            if (index < 0 || index >= totalSpreads) {
+                return;
+            }
+
+            const currentSpread = spreads[currentSpreadIndex];
+            const targetSpread = spreads[index];
+
+            if (direction === 'next') {
+                // Animasi balik halaman kanan ke kiri
+                const rightPage = currentSpread.querySelector('.right-page');
+                if (rightPage) {
+                    // Flip halaman dan ganti spread bersamaan
+                    rightPage.classList.add('flippable', 'flipping');
+                    
+                    setTimeout(() => {
+                        currentSpread.classList.add('exiting');
+                        currentSpread.classList.remove('active');
+                        targetSpread.classList.add('active');
+                    }, 400);
+                    
+                    setTimeout(() => {
+                        rightPage.classList.remove('flippable', 'flipping');
+                        currentSpread.classList.remove('exiting');
+                    }, 1100);
+                }
+            } else {
+                // Animasi balik halaman kiri ke kanan (mundur)
+                currentSpread.classList.add('exiting');
+                currentSpread.classList.remove('active');
+                targetSpread.classList.add('active');
+                
+                setTimeout(() => {
+                    currentSpread.classList.remove('exiting');
+                }, 600);
+            }
+
+            currentSpreadIndex = index;
+        }
+
+        // Klik pada halaman kanan untuk next, halaman kiri untuk prev
+        bookContainer.addEventListener('click', (e) => {
+            const rect = bookContainer.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const containerWidth = rect.width;
+            
+            // Jika klik di sebelah kanan (lebih dari 50% lebar), next
+            if (clickX > containerWidth / 2) {
+                if (currentSpreadIndex < totalSpreads - 1) {
+                    goToSpread(currentSpreadIndex + 1, 'next');
+                } else {
+                    // Jika sudah di halaman terakhir, zoom out dan redirect ke Close.html
+                    document.body.classList.add('zoom-transition');
+                    bookContainer.classList.add('zoom-out');
+                    setTimeout(() => {
+                        window.location.href = 'Close.html';
+                    }, 1200);
+                }
+            } 
+            // Jika klik di sebelah kiri (kurang dari 50% lebar), prev
+            else {
+                if (currentSpreadIndex > 0) {
+                    goToSpread(currentSpreadIndex - 1, 'prev');
+                }
+            }
+        });
+
+        // Tambahkan cursor pointer untuk indikasi bisa diklik
+        bookContainer.style.cursor = 'pointer';
+
+        // Inisialisasi: Tampilkan spread pertama saat dimuat
+        goToSpread(0);
+    </script>
+
+</body>
+</html>

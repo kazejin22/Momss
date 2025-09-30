@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Mama</title>
+    
+    <style>
+        /* --- Global & Posisi Tengah --- */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #ffdfec 70%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* Mencegah scrollbar saat zoom */
+        }
+
+        /* --- Wrapper Amplop --- */
+        .envelope-wrapper {
+            position: relative;
+            z-index: 10;
+            cursor: pointer;
+            /* Durasi transisi untuk efek zoom (1 detik) */
+            transition: transform 1s cubic-bezier(0.5, 0, 0.5, 1), opacity 0.5s 0.8s; 
+        }
+
+        .envelope {
+            width: 300px;
+            height: 200px;
+            position: relative;
+        }
+
+        /* --- Bagian Amplop --- */
+        .body-flap {
+            width: 100%;
+            height: 100%;
+            background-color: #ffb0e3; /* Warna Amplop Coklat Muda */
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            border-radius: 5px;
+        }
+
+        .top-flap {
+            width: 0;
+            height: 0;
+            /* Membuat bentuk segitiga */
+            border-left: 150px solid transparent; 
+            border-right: 150px solid transparent;
+            border-top: 100px solid #ff8ad6; /* Warna Tutup Amplop Coklat Lebih Tua */
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: top;
+            transition: transform 0.5s ease-in-out;
+            z-index: 3;
+        }
+
+        /* --- Kertas Surat --- */
+        .letter {
+            width: 90%;
+            height: 90%;
+            background-color: white;
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            transform: translateY(20px); /* Kertas masuk sedikit (initial state) */
+            transition: transform 0.7s ease-in-out, opacity 0.3s;
+            opacity: 0; /* Awalnya tersembunyi */
+        }
+        
+        /* --- STAGE 1: Klik untuk Buka Amplop & Tampilkan Kertas --- */
+        .envelope-wrapper.clicked .top-flap {
+            transform: rotateX(180deg); /* Tutup terbuka ke belakang */
+            z-index: 1; 
+        }
+
+        .envelope-wrapper.clicked .letter {
+            transform: translateY(-50px); /* Kertas naik dan terlihat jelas */
+            opacity: 1;
+        }
+
+        /* --- STAGE 2: Klik Tombol untuk Zoom dan Transisi --- */
+        .envelope-wrapper.zoomed {
+            /* Zoom sangat besar untuk menutupi layar */
+            transform: scale(30); 
+            opacity: 0; /* Amplop utama memudar di akhir zoom */
+            pointer-events: none;
+        }
+
+        /* --- Halaman Konten Akhir --- */
+        .page-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            z-index: 5; 
+            opacity: 0; /* Awalnya tersembunyi */
+            /* Transisi opacity 0.5s dimulai setelah 0.8s (saat zoom hampir selesai) */
+            transition: opacity 0.5s ease 0.8s; 
+        }
+
+        .page-content.show {
+            opacity: 1;
+            z-index: 100; /* Paling atas saat muncul */
+        }
+
+        /* --- Styling Tombol --- */
+        #openPageButton {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #ffb6d9, #ff80aa);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #openPageButton:hover {
+            background: linear-gradient(135deg, #ff80aa, #ff4d88);
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 77, 136, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="envelope-wrapper" id="envelopeWrapper">
+        <div class="envelope" id="envelope">
+            
+            <div class="flap top-flap"></div>
+            
+            <div class="letter">
+                <p>A little surprise awaits 💌</p>
+                <p>Let’s see what’s waiting for you next...</p>
+                <button id="openPageButton">Next ➝</button>
+            </div>
+            
+            <div class="body-flap"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const envelopeWrapper = document.getElementById('envelopeWrapper');
+            const openPageButton = document.getElementById('openPageButton');
+
+            let isLetterVisible = false;
+
+            // --- KLIK TAHAP 1: Buka Amplop Sedikit ---
+            envelopeWrapper.addEventListener('click', () => {
+                if (!isLetterVisible) {
+                    // Tambahkan class 'clicked' untuk memicu CSS agar amplop terbuka
+                    envelopeWrapper.classList.add('clicked');
+                    isLetterVisible = true;
+                }
+            });
+
+            // --- KLIK TAHAP 2: Zoom dan Transisi ke Welcome.html ---
+            openPageButton.addEventListener('click', (event) => {
+                // Hentikan event agar klik tombol tidak dianggap sebagai klik di wrapper (Tahap 1)
+                event.stopPropagation(); 
+
+                // 1. Mulai transisi zoom dengan menambahkan class 'zoomed'
+                envelopeWrapper.classList.add('zoomed');
+
+                // 2. Redirect ke Welcome.html setelah animasi zoom selesai
+                // (1000ms = 1 detik, sesuai durasi transisi zoom di CSS)
+                setTimeout(() => {
+                    window.location.href = 'Welcome.html';
+                }, 1000); 
+            });
+        });
+    </script>
+</body>
+</html>
